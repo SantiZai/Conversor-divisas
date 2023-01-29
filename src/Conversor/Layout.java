@@ -1,109 +1,145 @@
 package Conversor;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Layout extends JFrame implements ActionListener {
     JPanel panel;
-    JLabel tituloSeleccion, divisas, temperaturas, resultado;
-    JButton btnAceptar, btnConvertir;
-    JTextField inputValor;
-    JComboBox<String> menu, tiposDivisas, tiposDivisasIntroducidos, tiposTemperaturas;
+    JLabel tituloSeleccion, output;
+    JButton convertir;
+    JTextField input;
+    JComboBox<String> menu, valoresIntroducidos, valoresOutput;
+
+    public double aDolar = 1.08701;
+    public double aEuro = 0.919958;
+    public double vKelvin = 273.15;
+
+    private String seleccionado = "Divisas";
+
+    public String getSeleccionado() {
+        return seleccionado;
+    }
+
+    public void setSeleccionado(String seleccionado) {
+        this.seleccionado = seleccionado;
+    }
+
+    public ArrayList<String> valores;
+
+    public void setValores(ArrayList<String> valores) {
+        this.valores = valores;
+    }
+
+    List<String> elemsDi = Arrays.asList("Euros", "Dólares");
+    ArrayList<String> divis = new ArrayList<>(elemsDi);
+
+    List<String> elemsTe = Arrays.asList("Celsius", "Kelvin");
+    ArrayList<String> tempe = new ArrayList<>(elemsTe);
+
+    public void setearTipoInput(String tipo) {
+        if (Objects.equals(tipo, "Divisas")) {
+            setValores(divis);
+        } else {
+            setValores(tempe);
+        }
+    }
+
+    public String convertirTipo(String tipoConversion, double valor) {
+        if(Objects.equals(tipoConversion, "Divisas")) {
+            if(Objects.equals(valoresIntroducidos.getSelectedItem(), "Euros")) {
+                return String.valueOf(valor * aDolar);
+            } else {
+                return String.valueOf(valor * aEuro);
+            }
+        } else {
+            if(Objects.equals(valoresIntroducidos.getSelectedItem(), "Celsius")) {
+                return String.valueOf(valor + vKelvin);
+            } else {
+                return String.valueOf(valor - vKelvin);
+            }
+        }
+    }
+
+    public void traerUI() {
+        output.setText("");
+        output.setVisible(true);
+        input.setVisible(true);
+        convertir.setVisible(true);
+        valoresIntroducidos.removeAllItems();
+        valoresOutput.removeAllItems();
+        valoresIntroducidos.addItem(valores.get(0));
+        valoresIntroducidos.addItem(valores.get(1));
+        valoresOutput.addItem(valores.get(0));
+        valoresOutput.addItem(valores.get(1));
+        valoresIntroducidos.setVisible(true);
+        valoresOutput.setVisible(true);
+    }
 
     Layout() {
+
         // Labels
         tituloSeleccion = new JLabel("Selecciona el método de conversión");
         tituloSeleccion.setBounds(150, 0, 250, 20);
 
-        resultado = new JLabel("");
-        resultado.setBounds(150, 250, 250, 20);
-        resultado.setVisible(false);
+        output = new JLabel("");
+        output.setBounds(190, 140, 100, 20);
+        add(output);
+        output.setVisible(false);
 
-        // Inputs
-        inputValor = new JTextField();
-        inputValor.setBounds(150, 50, 250, 20);
-        inputValor.setVisible(false);
+        // Input valor a convertir
+        input = new JTextField("");
+        input.setBounds(10, 140, 100, 20);
+        add(input);
+        input.setVisible(false);
 
-        // ComboBox
-        menu = new JComboBox<String>();
+        // Combos introducidos
+        valoresIntroducidos = new JComboBox<>();
+        valoresIntroducidos.setBounds(10, 100, 100, 20);
+        add(valoresIntroducidos);
+        valoresIntroducidos.setVisible(false);
+
+        valoresOutput = new JComboBox<>();
+        valoresOutput.setBounds(190, 100, 100, 20);
+        add(valoresOutput);
+        valoresOutput.setVisible(false);
+
+        // ComboBox tipo de conversión
+        menu = new JComboBox<>();
         menu.setBounds(150, 50, 250, 20);
         add(menu);
         menu.addItem("Divisas");
         menu.addItem("Temperaturas");
-
-        tiposDivisasIntroducidos = new JComboBox<String>();
-        tiposDivisasIntroducidos.setBounds(10, 100, 100, 20);
-        add(tiposDivisasIntroducidos);
-        tiposDivisasIntroducidos.addItem("Euros");
-        tiposDivisasIntroducidos.addItem("Dólares");
-        tiposDivisasIntroducidos.addItem("Pesos");
-        tiposDivisasIntroducidos.setVisible(false);
-
-
-        tiposDivisas = new JComboBox<String>();
-        tiposDivisas.setBounds(200, 100, 100, 20);
-        add(tiposDivisas);
-        tiposDivisas.addItem("Euros");
-        tiposDivisas.addItem("Dólares");
-        tiposDivisas.addItem("Pesos");
-        tiposDivisas.setVisible(false);
+        menu.addActionListener(e -> {
+            if(menu.getSelectedItem() == "Divisas") {
+                setSeleccionado("Divisas");
+                tituloSeleccion.setText("Conversor de " + getSeleccionado());
+                setearTipoInput("Divisas");
+            } else {
+                setSeleccionado("Temperaturas");
+                tituloSeleccion.setText("Conversor de " + getSeleccionado());
+                setearTipoInput("Temperaturas");
+            }
+        traerUI();
+        });
 
         // Botones
-        btnAceptar = new JButton();
-        btnAceptar.setBounds(150, 300, 250, 20);
-        btnAceptar.setText("Aceptar");
-        btnAceptar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String seleccionado = (String) menu.getSelectedItem();
-                if(Objects.equals(seleccionado, "Divisas")) {
-                    tituloSeleccion.setVisible(false);
-                    menu.setVisible(false);
-                    inputValor.setVisible(true);
-                    tiposDivisasIntroducidos.setVisible(true);
-                    tiposDivisas.setVisible(true);
-                    btnConvertir.setVisible(true);
-                }
-            }
-        });
-
-        btnConvertir = new JButton();
-        btnConvertir.setBounds(150, 300, 250, 20);
-        btnConvertir.setText("Convertir");
-        btnConvertir.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String ingresoSeleccionado = (String) tiposDivisasIntroducidos.getSelectedItem();
-                String conversionSeleccionado = (String) tiposDivisas.getSelectedItem();
-                resultado.setVisible(true);
-                if (!(Objects.equals(inputValor.getText(), ""))) {
-                    if (Objects.equals(ingresoSeleccionado, conversionSeleccionado)) {
-                        JOptionPane.showMessageDialog(null, "Las divisas deben ser distintas");
-                    } else {
-                        int ingresado = Integer.parseInt(inputValor.getText());
-                        resultado.setText(String.valueOf(ingresado));
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Ingresar un valor");
-                }
-            }
-        });
-        btnConvertir.setVisible(false);
+        convertir = new JButton();
+        convertir.setBounds(100, 200, 70, 20);
+        add(convertir);
+        convertir.addActionListener(e -> output.setText(convertirTipo(getSeleccionado(), Double.parseDouble(input.getText()))));
+        convertir.setVisible(false);
 
         // Panel
         panel = new JPanel();
         panel.setLayout(null);
 
-        panel.add(inputValor);
-        panel.add(tiposDivisas);
-        panel.add(tiposDivisasIntroducidos);
         panel.add(tituloSeleccion);
         panel.add(menu);
-        panel.add(resultado);
-        panel.add(btnConvertir);
-        panel.add(btnAceptar);
 
         add(panel);
         setSize(600, 600);
